@@ -5,12 +5,15 @@ const Usuario = require('../models/usuario');
 const app = express();
 
 app.get('/usuario', function(req, res) {
+
+    // {estado: true}
+
     let desde = req.query.desde || 0;
     desde = Number(desde);
     let limite = req.query.limite || 5;
     limite = Number(limite);
 
-    Usuario.find({}, 'nombre email role google img')
+    Usuario.find({ estado: true }, 'nombre email role google img')
         .skip(desde) // Salta los primeros "desde" (1, 2, 5, etc.) y muestra a partir de ahí...
         .limit(limite) // ...los siguientes 10 solamente
         .exec((err, usuarios) => {
@@ -21,7 +24,7 @@ app.get('/usuario', function(req, res) {
                 });
             }
 
-            Usuario.countDocuments({}, (err, conteo) => {
+            Usuario.countDocuments({ estado: true }, (err, conteo) => {
                 res.json({
                     ok: true,
                     usuarios: usuarios, //Recuerda que a partir de versión 6 ya solo necesitas poner usuarios (si se llaman igual)
@@ -85,16 +88,26 @@ app.put('/usuario/:id', function(req, res) {
 
 });
 app.delete('/usuario/:id', function(req, res) {
+
     let id = req.params.id;
-    Usuario.findByIdAndRemove(id, (err, usuarioBorrado) => {
+
+    //console.log(id);
+    Usuario.findByIdAndUpdate(id, { estado: false }, {
+        // http://mongoosejs.com/docs/api.html#model_Model.findByIdAndUpdate
+        // Para regresar el nuevo documento en vez del original
+        new: true,
+        //Ejecuta las validaciones antes de actualizar
+        runValidators: true,
+        context: 'query'
+    }, (err, usuarioDB) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
                 err
             });
         }
-        //if (usuarioBorrado === null) {
-        if (!usuarioBorrado) { // Es lo mismo que lo comentado arriba
+        //console.log(usuarioDB);
+        if (!usuarioDB) { // Es lo mismo que lo comentado arriba
             return res.status(400).json({
                 ok: false,
                 err: {
@@ -104,8 +117,8 @@ app.delete('/usuario/:id', function(req, res) {
         }
         res.json({
             ok: true,
-            usuario: usuarioBorrado
-        });
+            usuario: usuarioDB
+        }); // Respuesta JSON
     });
 });
 
