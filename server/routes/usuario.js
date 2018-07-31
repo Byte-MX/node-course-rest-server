@@ -10,7 +10,7 @@ app.get('/usuario', function(req, res) {
     let limite = req.query.limite || 5;
     limite = Number(limite);
 
-    Usuario.find({})
+    Usuario.find({}, 'nombre email role google img')
         .skip(desde) // Salta los primeros "desde" (1, 2, 5, etc.) y muestra a partir de ahí...
         .limit(limite) // ...los siguientes 10 solamente
         .exec((err, usuarios) => {
@@ -84,9 +84,29 @@ app.put('/usuario/:id', function(req, res) {
 
 
 });
-app.delete('/usuario', function(req, res) {
-    //res.send('Hello World!')      // Respuesta HTML
-    res.json('delete Usuario') // Respuesta JSON
+app.delete('/usuario/:id', function(req, res) {
+    let id = req.params.id;
+    Usuario.findByIdAndRemove(id, (err, usuarioBorrado) => {
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
+            });
+        }
+        //if (usuarioBorrado === null) {
+        if (!usuarioBorrado) { // Es lo mismo que lo comentado arriba
+            return res.status(400).json({
+                ok: false,
+                err: {
+                    message: 'Usuario no encontrado'
+                }
+            });
+        }
+        res.json({
+            ok: true,
+            usuario: usuarioBorrado
+        });
+    });
 });
 
 module.exports = app;
