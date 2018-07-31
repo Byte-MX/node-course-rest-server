@@ -1,0 +1,14 @@
+{
+  "name": "07-restserver",
+  "version": "1.0.0",
+  "description": "REST Server example for NodeJS course",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Alberto Pérez Romero",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}
