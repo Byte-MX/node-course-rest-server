@@ -5,8 +5,30 @@ const Usuario = require('../models/usuario');
 const app = express();
 
 app.get('/usuario', function(req, res) {
-    //res.send('Hello World!')      // Respuesta HTML
-    res.json('get Usuario') // Respuesta JSON
+    let desde = req.query.desde || 0;
+    desde = Number(desde);
+    let limite = req.query.limite || 5;
+    limite = Number(limite);
+
+    Usuario.find({})
+        .skip(desde) // Salta los primeros "desde" (1, 2, 5, etc.) y muestra a partir de ahí...
+        .limit(limite) // ...los siguientes 10 solamente
+        .exec((err, usuarios) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    err
+                });
+            }
+
+            Usuario.countDocuments({}, (err, conteo) => {
+                res.json({
+                    ok: true,
+                    usuarios: usuarios, //Recuerda que a partir de versión 6 ya solo necesitas poner usuarios (si se llaman igual)
+                    cuantos: conteo
+                });
+            });
+        })
 });
 app.post('/usuario', function(req, res) {
     let body = req.body;
