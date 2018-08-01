@@ -2,17 +2,24 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const _ = require('underscore');
 const Usuario = require('../models/usuario');
+const { verificaToken, verificaPermisos } = require('../middlewares/autenticacion');
 const app = express();
 
-app.get('/usuario', function(req, res) {
+//app.get('/usuario', function(req, res) {
+app.get('/usuario', verificaToken, (req, res) => { //Aquí solo indico que ese middleware (verificaToken) se va a disparar al llamarse el get.
+    /*
+        return res.json({
+            usuario: req.usuario,
+            nombre: req.usuario.nombre,
+            email: req.usuario.email
+        });
 
-    // {estado: true}
-
+    */
     let desde = req.query.desde || 0;
     desde = Number(desde);
     let limite = req.query.limite || 5;
     limite = Number(limite);
-
+    // {estado: true}
     Usuario.find({ estado: true }, 'nombre email role google img')
         .skip(desde) // Salta los primeros "desde" (1, 2, 5, etc.) y muestra a partir de ahí...
         .limit(limite) // ...los siguientes 10 solamente
@@ -33,7 +40,7 @@ app.get('/usuario', function(req, res) {
             });
         })
 });
-app.post('/usuario', function(req, res) {
+app.post('/usuario', [verificaToken, verificaPermisos], function(req, res) {
     let body = req.body;
     //res.send('Hello World!')      // Respuesta HTML
 
@@ -58,7 +65,7 @@ app.post('/usuario', function(req, res) {
         })
     });
 });
-app.put('/usuario/:id', function(req, res) {
+app.put('/usuario/:id', [verificaToken, verificaPermisos], function(req, res) {
     //res.send('Hello World!')      // Respuesta HTML
     let id = req.params.id;
     let body = _.pick(req.body, ['nombre', 'email', 'img', 'role', 'estado']);
@@ -87,7 +94,7 @@ app.put('/usuario/:id', function(req, res) {
 
 
 });
-app.delete('/usuario/:id', function(req, res) {
+app.delete('/usuario/:id', [verificaToken, verificaPermisos], function(req, res) {
 
     let id = req.params.id;
 
