@@ -76,6 +76,39 @@ app.get('/productos/:id', verificaToken, (req, res) => {
 });
 
 //============================================
+// Buscar productos
+//============================================
+app.get('/productos/buscar/:termino', verificaToken, (req, res) => {
+
+    let termino = req.params.termino;
+
+    let regex = new RegExp(termino, 'i'); // i = insensible a mayúsculas y minúsculas
+
+    Producto.find({ nombre: regex })
+        .populate('categoria', 'nombre')
+        .exec((err, productos) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    err
+                });
+            }
+            if (!productos) {
+                return res.status(400).json({
+                    ok: false,
+                    err: {
+                        message: 'No se encontraron productos.'
+                    }
+                });
+            }
+            res.json({
+                ok: true,
+                productos
+            });
+        });
+});
+
+//============================================
 // Crear un producto
 //============================================
 app.post('/productos', verificaToken, (req, res) => {
