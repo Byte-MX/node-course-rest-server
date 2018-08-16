@@ -15,7 +15,8 @@ let categoriaSchema = new Schema({
     },
     idUsuario: {
         type: Schema.Types.ObjectId,
-        required: [true, 'La categoría debe incluir el id del usuario que la creó']
+        required: [true, 'La categoría debe incluir el id del usuario que la creó'],
+        ref: 'Usuario'
     }
 });
 

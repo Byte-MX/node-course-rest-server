@@ -10,7 +10,11 @@ let Categoria = require('../models/categoria');
 // Mostrar todas las categorías
 //============================================
 app.get('/categoria', verificaToken, (req, res) => {
-    Categoria.find({}, 'nombre descripcion')
+    Categoria.find({})
+        .sort('nombre') // Ordena por nombre
+        //.populate('idUsuario')    // Llena todos los datos del usuario.
+        .populate('idUsuario', 'nombre email') // Llena solo los datos solicitados de esa tabla
+        //.populate('otraTabla', 'campo1, campo2')    // Puedo poner varios seguidos
         .exec((err, categorias) => {
             if (err) {
                 return res.status(400).json({
